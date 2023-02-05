@@ -1,6 +1,7 @@
 import { Button, ConfigProvider } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { shallow } from "zustand/shallow";
 import reactLogo from "./assets/react.svg";
 import Contact from "./pages/Contact";
 import Dashboard from "./pages/Dashboard";
@@ -8,10 +9,23 @@ import ErrorPage from "./pages/Error";
 import Login from "./pages/Login";
 import Protected from "./pages/Protected";
 import Root from "./pages/Root";
+import useAuthStore from "./stores/useAuthStore";
+import { isLoggedIn } from "./utils";
 
 function App() {
-  const [count, setCount] = useState(0);
-  const isSignedIn = false;
+  const { setIsSignedIn, isSignedIn } = useAuthStore(
+    (state) => ({
+      setIsSignedIn: state.setIsSignedIn,
+      isSignedIn: state.isSignedIn,
+    }),
+    shallow
+  );
+
+  console.log(isSignedIn);
+
+  useEffect(() => {
+    setIsSignedIn(isLoggedIn());
+  }, []);
 
   const router = createBrowserRouter([
     {

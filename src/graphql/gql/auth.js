@@ -7,3 +7,12 @@ export const MUTATION_LOGIN = gql`
     }
   }
 `;
+
+export const QUERY_GET_CURRENT_USER = gql`
+  query FindByToken {
+    findByToken {
+      _id
+      username
+    }
+  }
+`;

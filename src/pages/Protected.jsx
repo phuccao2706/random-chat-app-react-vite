@@ -9,6 +9,7 @@ function Protected({ children, publicRoute }) {
     shallow
   );
 
+  console.log("a", isSignedIn && publicRoute);
   if (isSignedIn && publicRoute) {
     return <Navigate to="/" replace />;
   }

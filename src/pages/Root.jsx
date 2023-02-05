@@ -1,55 +1,112 @@
-import { Button } from "antd";
+import { Breadcrumb, Button, Layout, Menu, theme } from "antd";
 import { Link, Outlet } from "react-router-dom";
+import {
+  LaptopOutlined,
+  NotificationOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import useAuthStore from "../stores/useAuthStore";
 import { shallow } from "zustand/shallow";
+import { useQuery } from "@apollo/client";
+import { QUERY_GET_CURRENT_USER } from "../graphql/gql";
+import { logout, removeAccessToken } from "../utils";
+import React from "react";
+import TheHeader from "../components/TheHeader";
+const { Header, Content, Sider } = Layout;
 
 export default function Root() {
-  const { setIsSignedIn } = useAuthStore(
-    (state) => ({ setIsSignedIn: state.setIsSignedIn }),
+  const { setIsSignedIn, setCurrentUser } = useAuthStore(
+    ({ setIsSignedIn, setCurrentUser }) => ({ setIsSignedIn, setCurrentUser }),
     shallow
   );
 
+  const {
+    token: { colorBgContainer },
+  } = theme.useToken();
+
+  const items1 = ["1", "2", "3"].map((key) => ({
+    key,
+    label: `nav ${key}`,
+  }));
+  const items2 = [UserOutlined, LaptopOutlined, NotificationOutlined].map(
+    (icon, index) => {
+      const key = String(index + 1);
+      return {
+        key: `sub${key}`,
+        icon: React.createElement(icon),
+        label: `subnav ${key}`,
+        children: new Array(4).fill(null).map((_, j) => {
+          const subKey = index * 4 + j + 1;
+          return {
+            key: subKey,
+            label: `option${subKey}`,
+          };
+        }),
+      };
+    }
+  );
+
+  useQuery(QUERY_GET_CURRENT_USER, {
+    onCompleted: ({ findByToken }) => {
+      setCurrentUser(findByToken);
+      setIsSignedIn(true);
+    },
+    onError: () => {
+      console.log("a");
+      logout();
+    },
+  });
+
   return (
     <>
-      <div id="sidebar">
-        <h1>React Router Contacts</h1>
-        <div>
-          <form id="search-form" role="search">
-            <input
-              id="q"
-              aria-label="Search contacts"
-              placeholder="Search"
-              type="search"
-              name="q"
-            />
-            <div id="search-spinner" aria-hidden hidden={true} />
-            <div className="sr-only" aria-live="polite"></div>
-          </form>
-          <form method="post">
-            <button type="submit">New</button>
-          </form>
-        </div>
-        <nav>
-          <ul>
-            <li>
-              <Link to={`/`}>Dashboard</Link>
-            </li>
-            <li>
-              <Link to={`contacts/1`}>Your Name</Link>
-            </li>
-            <li>
-              <Link to={`contacts/2`}>Your fr</Link>
-            </li>
+      <Layout style={{ minHeight: "100vh" }}>
+        <TheHeader />
 
-            <Button onClick={() => setIsSignedIn(false)} type="primary">
-              logout
-            </Button>
-          </ul>
-        </nav>
-      </div>
-      <div id="detail">
-        <Outlet />
-      </div>
+        <Layout>
+          <Sider
+            width={200}
+            style={{
+              background: colorBgContainer,
+            }}
+          >
+            <Menu
+              mode="inline"
+              defaultSelectedKeys={["1"]}
+              defaultOpenKeys={["sub1"]}
+              style={{
+                height: "100%",
+                borderRight: 0,
+              }}
+              items={items2}
+            />
+          </Sider>
+          <Layout
+            style={{
+              padding: "0 24px 24px",
+            }}
+          >
+            <Breadcrumb
+              style={{
+                margin: "16px 0",
+              }}
+            >
+              <Breadcrumb.Item>Home</Breadcrumb.Item>
+              <Breadcrumb.Item>List</Breadcrumb.Item>
+              <Breadcrumb.Item>App</Breadcrumb.Item>
+            </Breadcrumb>
+            <Content
+              style={{
+                padding: 24,
+                margin: 0,
+                minHeight: 280,
+                background: colorBgContainer,
+              }}
+            >
+              Content
+            </Content>
+          </Layout>
+        </Layout>
+      </Layout>
     </>
   );
 }

@@ -12,6 +12,7 @@
     "@apollo/client": "^3.7.6",
     "antd": "^5.1.7",
     "graphql": "^16.6.0",
+    "js-cookie": "^3.0.1",
     "localforage": "^1.10.0",
     "match-sorter": "^6.3.1",
     "react": "^18.2.0",
